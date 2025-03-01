@@ -25,6 +25,50 @@ class CalculatorApp extends StatefulWidget {
 
 class _CalculatorAppState extends State<CalculatorApp> {
   String _displayText = "0";
+  bool _isNewInput = true;
+
+  void _onNumberPressed(String number) {
+    setState(() {
+      if (_isNewInput || _displayText == "0") {
+        _displayText = number;
+        _isNewInput = false;
+      } else {
+        _displayText += number;
+      }
+    });
+  }
+
+  void _onOperatorPressed(String operator) {
+    setState(() {
+      if (!_displayText.endsWith('+') &&
+          !_displayText.endsWith('-') &&
+          !_displayText.endsWith('*') &&
+          !_displayText.endsWith('/')) {
+        _displayText += operator;
+        _isNewInput = false;
+      }
+    });
+  }
+
+  void _onEqualsPressed() {
+    // Will implement calculation in the next step
+    setState(() {
+      _isNewInput = true;
+    });
+  }
+
+  void _onButtonPressed(String buttonText) {
+    if (buttonText == '=') {
+      _onEqualsPressed();
+    } else if (buttonText == '+' ||
+        buttonText == '-' ||
+        buttonText == '*' ||
+        buttonText == '/') {
+      _onOperatorPressed(buttonText);
+    } else {
+      _onNumberPressed(buttonText);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,14 +125,19 @@ class _CalculatorAppState extends State<CalculatorApp> {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.all(24),
+            backgroundColor: text == '='
+                ? Colors.orange
+                : (text == '+' || text == '-' || text == '*' || text == '/')
+                    ? Colors.purple
+                    : Colors.blue,
           ),
-          onPressed: () {
-            // Button functionality will be added in next step
-          },
+          onPressed: () => _onButtonPressed(text),
           child: Text(
             text,
             style: TextStyle(
               fontSize: 24,
+              color:
+                  Colors.white, // Changed text color to white for all buttons
             ),
           ),
         ),
