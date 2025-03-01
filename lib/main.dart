@@ -26,6 +26,8 @@ class CalculatorApp extends StatefulWidget {
 class _CalculatorAppState extends State<CalculatorApp> {
   String _displayText = "0";
   bool _isNewInput = true;
+  String _firstOperand = "";
+  String _operator = "";
 
   void _onNumberPressed(String number) {
     setState(() {
@@ -39,22 +41,58 @@ class _CalculatorAppState extends State<CalculatorApp> {
   }
 
   void _onOperatorPressed(String operator) {
-    setState(() {
-      if (!_displayText.endsWith('+') &&
-          !_displayText.endsWith('-') &&
-          !_displayText.endsWith('*') &&
-          !_displayText.endsWith('/')) {
-        _displayText += operator;
-        _isNewInput = false;
-      }
-    });
+    // Save the first operand and the operator
+    if (_displayText != "0" && !_isNewInput) {
+      _firstOperand = _displayText;
+      _operator = operator;
+      _isNewInput = true;
+    }
   }
 
   void _onEqualsPressed() {
-    // Will implement calculation in the next step
-    setState(() {
-      _isNewInput = true;
-    });
+    if (_firstOperand.isNotEmpty && _operator.isNotEmpty && !_isNewInput) {
+      double result = 0;
+      double num1 = double.parse(_firstOperand);
+      double num2 = double.parse(_displayText);
+
+      switch (_operator) {
+        case '+':
+          result = num1 + num2;
+          break;
+        case '-':
+          result = num1 - num2;
+          break;
+        case '*':
+          result = num1 * num2;
+          break;
+        case '/':
+          if (num2 != 0) {
+            result = num1 / num2;
+          } else {
+            // Handle division by zero
+            setState(() {
+              _displayText = "Error";
+              _isNewInput = true;
+              _firstOperand = "";
+              _operator = "";
+            });
+            return;
+          }
+          break;
+      }
+
+      setState(() {
+        // Format the result to remove decimal if it's a whole number
+        if (result == result.roundToDouble()) {
+          _displayText = result.toInt().toString();
+        } else {
+          _displayText = result.toString();
+        }
+        _isNewInput = true;
+        _firstOperand = "";
+        _operator = "";
+      });
+    }
   }
 
   void _onButtonPressed(String buttonText) {
@@ -65,6 +103,17 @@ class _CalculatorAppState extends State<CalculatorApp> {
         buttonText == '*' ||
         buttonText == '/') {
       _onOperatorPressed(buttonText);
+    } else if (buttonText == '.') {
+      if (!_displayText.contains('.')) {
+        setState(() {
+          if (_isNewInput) {
+            _displayText = "0.";
+            _isNewInput = false;
+          } else {
+            _displayText += '.';
+          }
+        });
+      }
     } else {
       _onNumberPressed(buttonText);
     }
@@ -87,6 +136,18 @@ class _CalculatorAppState extends State<CalculatorApp> {
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // Display the current operation
+          Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              _firstOperand.isNotEmpty ? "$_firstOperand $_operator" : "",
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.grey,
               ),
             ),
           ),
