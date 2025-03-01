@@ -102,9 +102,11 @@ class _CalculatorAppState extends State<CalculatorApp> {
             break;
           case '/':
             if (num2 == 0) {
-              throw Exception("Cannot divide by zero");
+              // Return 0 for division by zero instead of throwing an error
+              result = 0;
+            } else {
+              result = num1 / num2;
             }
-            result = num1 / num2;
             break;
         }
 
